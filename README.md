@@ -17,16 +17,19 @@ The dataset is divided into training and testing sets using the train-test split
 
 Algorithm
 
-XGBoost is often best because it captures complex nonlinear patterns and feature interactions very well.
-Random Forest is also strong and usually beats simpler models on tabular housing data.
-KNN can work, but it is usually weaker for house-price tasks because it depends heavily on distance and feature scaling.
-Linear Regression is the simplest, but it often gives the worst performance when relationships are not linear.
+Linear Regression is the simplest model. It assumes a straight-line relationship between the input features and house price, so it is easy to understand, but it may not capture complex property market patterns well.
 
-Best model statement
+KNN (K-Nearest Neighbors) predicts a house price by looking at the most similar houses in the dataset. It can work well in some cases, but its accuracy often drops when the data is large, noisy, or has many features.
 
-After comparing Linear Regression, KNN, Random Forest, and XGBoost, XGBoost was the best model overall because it achieved the highest 
+Random Forest uses many decision trees and combines their results. It is strong for tabular data and can handle nonlinear relationships better than linear regression, but it may still be less accurate than XGBoost in many cases.
+
+Gradient Boosting builds trees one after another, with each new tree correcting the previous one’s errors. It is usually more accurate than basic models and often performs very well on house price prediction tasks.
+
+Best model explanation
+
+XGBoost is the best model because it gives the highest prediction accuracy on tabular housing data. It can learn nonlinear relationships and interactions between features such as area, rooms, age, and location better than simple linear methods. It also usually achieves a high 
 𝑅
 2
 R 
 2
-and lowest MAE on the test set, while Random Forest was the next strongest model
+  and low MAE, which means the predictions are closer to the actual house prices.
