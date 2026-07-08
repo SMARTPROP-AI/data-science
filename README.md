@@ -16,12 +16,10 @@ Train-Test Split
 The dataset is divided into training and testing sets using the train-test split method. This allows the model to learn from one portion of the data and be evaluated on unseen data, providing a more reliable estimate of predictive performance.
 
 Algorithm
+
 XGBoost is often best because it captures complex nonlinear patterns and feature interactions very well.
-
 Random Forest is also strong and usually beats simpler models on tabular housing data.
-
 KNN can work, but it is usually weaker for house-price tasks because it depends heavily on distance and feature scaling.
-
 Linear Regression is the simplest, but it often gives the worst performance when relationships are not linear.
 
 Best model statement
@@ -31,4 +29,4 @@ After comparing Linear Regression, KNN, Random Forest, and XGBoost, XGBoost was 
 2
 R 
 2
-  and lowest MAE on the test set, while Random Forest was the next strongest model
+and lowest MAE on the test set, while Random Forest was the next strongest model
