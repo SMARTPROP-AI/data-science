@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import XgboostRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import joblib
 
@@ -66,7 +66,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     random_state=42
 )
 
-model = RandomForestRegressor(
+model = XgboostRegressor(
     n_estimators=200,
     random_state=42
 )
