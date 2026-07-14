@@ -1,4 +1,4 @@
-PROPVALUATE 
+PROPVALUATE AI
 # 🏡 House Price Prediction using Machine Learning
 
 ## 📌 Project Overview
