@@ -1,4 +1,4 @@
-🏡 House Price Prediction using Machine Learning
+🏡 House Price Prediction 
 
 📈 Predict house prices using multiple Machine Learning Regression Algorithms and identify the best-performing model.
 
@@ -10,10 +10,15 @@ The project uses the California Housing Dataset from Scikit-learn and evaluates 
 
 ✨ Key Features
 📂 Data Collection & Processing
+
 📥 Loaded the California Housing Dataset from Scikit-learn.
+
 🧹 Cleaned and preprocessed the dataset using Pandas and NumPy.
+
 🔄 Performed feature engineering and data transformation.
+
 🔀 Split the dataset into training and testing sets for model evaluation.
+
 📊 Data Visualization
 
 The project includes various visualizations to understand the dataset and feature relationships.
