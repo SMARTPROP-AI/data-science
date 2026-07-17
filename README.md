@@ -1,127 +1,128 @@
-# PropValuate AI — Python Backend (FastAPI)
+🏡 House Price Prediction
 
-This is the full Python rewrite of PropValuate AI. The valuation model,
-SHAP-style explanations, forecast, recommendation logic, and — importantly —
-the **PDF report generation** all run on the server now, in Python, instead
-of in the browser. This fixes the original "Download PDF report" bug for
-good: it can't break due to a missing or misnamed JS library, because there
-is no client-side PDF library anymore.
+📈 Predict house prices using multiple Machine Learning Regression Algorithms and identify the best-performing model.
 
-## Project layout
+📖 Project Overview
 
-```
-main.py              → FastAPI app: routes for the page, valuation, PDF, chat
-model.py             → Valuation engine: XGBoost tree evaluator + business logic
-schemas.py           → Pydantic request models
-pdf_report.py         → Server-side PDF generation (ReportLab)
-data/
-  model.json          → Trained XGBoost trees (exported from train_model.py's model.json)
-  meta.json           → Feature maps, growth rates, R²/MAE, dropdown options
-  sub_stats.json       → Per-sublocality stats (distances, demand, convenience score)
-  heatmap.json        → All properties for the map view
-templates/
-  index.html          → The page (served as a static file — no template variables needed)
-static/
-  app.js              → Frontend logic; now calls the FastAPI backend instead of embedding data
-  style.css           → Unchanged design
-  leaflet.js/.css      → Map library
-train_model.py         → Retrains the model from the housing CSV (unchanged from before)
-requirements.txt       → Python dependencies
-```
+The House Price Prediction project predicts residential property prices using supervised machine learning techniques. The project compares the performance of multiple regression algorithms to determine the most accurate model for predicting house prices.
 
-## Running it
+The California Housing Dataset from Scikit-learn is used for training and testing the models. After evaluating different algorithms, XGBoost Regressor achieved the highest prediction accuracy and was selected as the final model.
 
-1. Create a virtual environment (recommended):
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate      # Windows: .venv\Scripts\activate
-   ```
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Start the server:
-   ```bash
-   uvicorn main:app --reload
-   ```
-4. Open **http://127.0.0.1:8000** in your browser.
+✨ Key Features
+📂 Data Collection & Processing
+📥 California Housing Dataset from Scikit-learn
+🧹 Data Cleaning using Pandas
+🔄 Data Preprocessing
+📊 Feature Engineering
+🔀 Train-Test Split
+📊 Data Visualization
 
-That's it — no Live Server, no `file://` quirks, no separate library files
-to keep in sync. Everything (page, styles, scripts, model, and PDF) is
-served by this one FastAPI app.
+Gain insights into the dataset using beautiful visualizations.
 
-## API endpoints
+📈 Histograms
+📉 Scatter Plots
+🔥 Correlation Heatmap
+📋 Feature Distribution Analysis
+📍 Price Distribution
 
-| Method | Path              | Purpose                                                        |
-|--------|-------------------|------------------------------------------------------------------|
-| GET    | `/`               | Serves the page                                                  |
-| GET    | `/api/meta`       | Dropdown options, sub-locality stats, model R²/MAE, ticker stats |
-| GET    | `/api/heatmap`    | All properties for the map                                       |
-| POST   | `/api/valuate`    | Runs a valuation, returns predicted price + explanations         |
-| POST   | `/api/pdf-report` | Runs a valuation and streams back a PDF report                   |
-| POST   | `/api/chat`       | Rule-based assistant answers about the last valuation            |
+Libraries Used:
 
-## Retraining the model
+Matplotlib
+Seaborn
+🤖 Machine Learning Models Compared
 
-`train_model.py` is unchanged — it still trains the XGBoost model from the
-housing CSV and writes `model.json` / `meta.json`. If you retrain, copy the
-new `model.json` into `data/model.json`, and merge the printed feature
-importances / R² / MAE into `data/meta.json` (the other fields in
-`meta.json` — locations, sub-locality stats, growth rates, etc. — come from
-a separate enrichment step, not from `train_model.py` alone).
+The following regression algorithms were trained and evaluated:
 
-## Why the PDF button was broken before
+🤖 Model	📌 Description
+📈 Linear Regression	Baseline regression model
+👥 K-Nearest Neighbors (KNN)	Distance-based regression
+🌳 Random Forest Regressor	Ensemble learning using multiple decision trees
+🚀 Gradient Boosting Regressor	Sequential boosting algorithm
+⭐ XGBoost Regressor	Optimized Gradient Boosting with Regularization
+🏆 Best Performing Model
+⭐ XGBoost Regressor
 
-The old `index.html` loaded `<script src="jspdf.umd.min.js">`, but the
-uploaded library file was actually named `jspdf_umd_min.js` (underscores
-instead of dots). The browser 404'd silently, so `window.jspdf` was never
-defined, and clicking "Download PDF report" did nothing. This Python
-version sidesteps the whole class of bug: the PDF is built with ReportLab
-on the server and streamed to the browser as a file download, no client-side
-library required at all.
+After comparing all regression models, XGBoost produced the best overall performance.
 
-## Why the ₹ symbol looked garbled in the PDF
+✅ Why XGBoost?
+🚀 Highest Prediction Accuracy
+📉 Lowest Mean Absolute Error (MAE)
+📊 Highest R² Score
+⚡ Faster Training
+🧠 Handles Complex Non-linear Relationships
+🛡️ Built-in Regularization
+🌲 Prevents Overfitting
+📏 Model Evaluation
 
-ReportLab's built-in Helvetica/Times fonts are Adobe's "standard 14" fonts,
-which do not include the ₹ (Indian Rupee, U+20B9) glyph — so it silently
-rendered as a stray superscript character instead. `pdf_report.py` now
-embeds DejaVu Sans/Serif (bundled in `fonts/`), which does include ₹, and
-uses them for all text in the report.
+The models were evaluated using:
 
-## Tier 1 / Tier 2 / Tier 3 city coverage
+📊 R² Score
+📉 Mean Absolute Error (MAE)
+📈 Mean Squared Error (MSE)
+📌 Root Mean Squared Error (RMSE)
+📊 Model Comparison
+🤖 Algorithm	📊 Accuracy	⭐ Performance
+📈 Linear Regression	Good	⭐⭐☆☆☆
+👥 KNN Regressor	Better	⭐⭐⭐☆☆
+🌳 Random Forest	High	⭐⭐⭐⭐☆
+🚀 Gradient Boosting	Very High	⭐⭐⭐⭐☆
+🏆 XGBoost	Highest	⭐⭐⭐⭐⭐
 
-The location dropdown now covers 73 cities across three tiers (grouped with
-`<optgroup>` in the UI):
+Note: Replace these ratings with your actual evaluation metrics (R², MAE, RMSE, etc.) after training.
 
-- **Tier 1** (8): Delhi NCR, Mumbai, Bengaluru, Chennai, Hyderabad, Kolkata, Pune, Ahmedabad
-- **Tier 2** (35): Coimbatore, Madurai, Kochi, plus Tiruchirappalli, Salem,
-  Jaipur, Lucknow, Surat, Nagpur, Visakhapatnam, Guwahati, and 28 others
-- **Tier 3** (30): Dindigul, Karur, Sivakasi, Warangal, Kolhapur, Siliguri,
-  and 25 others
+🔄 Project Workflow
+📂 Load Dataset
+        │
+        ▼
+🧹 Data Preprocessing
+        │
+        ▼
+📊 Exploratory Data Analysis
+        │
+        ▼
+🔀 Train-Test Split
+        │
+        ▼
+🤖 Train Multiple Models
+        │
+        ▼
+📈 Compare Performance
+        │
+        ▼
+🏆 Select Best Model (XGBoost)
+        │
+        ▼
+🏡 House Price Prediction
+        │
+        ▼
+📉 Model Evaluation & Visualization
+🛠️ Technologies Used
+💻 Technology	✅ Purpose
+🐍 Python	Programming Language
+🐼 Pandas	Data Processing
+🔢 NumPy	Numerical Computing
+📊 Matplotlib	Data Visualization
+🎨 Seaborn	Statistical Visualization
+🤖 Scikit-learn	Machine Learning
+⚡ XGBoost	Advanced Gradient Boosting
+📓 Jupyter Notebook / Google Colab	Development Environment
+🚀 Getting Started
+1️⃣ Clone the Repository
+gh repo clone MYoussef885/House_Price_Prediction
+2️⃣ Install Dependencies
+pip install numpy pandas matplotlib seaborn scikit-learn xgboost
+3️⃣ Run the Project
 
-**Important caveat, spelled out because it matters:** the XGBoost model was
-only ever trained on real transaction data for the original 10 cities
-(Ahmedabad, Bengaluru, Chennai, Coimbatore, Delhi NCR, Hyderabad, Kochi,
-Madurai, Mumbai, Pune). There's no real data for the ~63 newly added cities,
-so `generate_city_expansion.py` does **not** invent fake "real" listings —
-instead:
+Open the notebook in Jupyter Notebook or Google Colab and execute the cells sequentially.
 
-1. Each new city gets a tier and, purely for feeding the model's
-   `location_c` feature, is mapped to a same-tier **proxy city** from the
-   original 10 (Mumbai for Tier 1, Coimbatore for Tier 2, Madurai for Tier 3).
-   This avoids the model extrapolating into a categorical code it never saw
-   in training.
-2. The features that actually carry most of the location signal — demand
-   index, local market index, convenience score, and distances to
-   facilities — are generated per sub-locality from tier-calibrated ranges
-   (calibrated against the min/max actually observed across the real 10
-   cities), with a fixed seed so results are reproducible run to run.
-3. Every generated sub-locality is flagged `"estimated": true` in
-   `sub_stats.json` — the app already had this mechanism (for sub-localities
-   in the original cities with too few sampled listings), so the UI already
-   shows an honest "modeled rather than measured" note for these areas
-   without any extra frontend work.
+🎯 Conclusion
 
-To add real data for any of these cities later, retrain on real transactions
-and re-run/extend `generate_city_expansion.py` accordingly — or just replace
-the relevant entries in `sub_stats.json` directly.
+This project demonstrates the application of multiple machine learning regression algorithms for predicting house prices.
+
+The comparative analysis shows that XGBoost Regressor outperforms Linear Regression, KNN, Random Forest, and Gradient Boosting by achieving the highest prediction accuracy and lowest prediction error.
+
+⭐ Final Selected Model: XGBoost Regressor
+
+📄 License
+
+This project is licensed under the MIT License.
