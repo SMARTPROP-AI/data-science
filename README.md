@@ -9,6 +9,7 @@ The House Price Prediction project predicts residential property prices using su
 The project uses the California Housing Dataset from Scikit-learn and evaluates each model using standard regression metrics. After comparing all models, XGBoost Regressor achieved the highest prediction accuracy and was selected as the final model.
 
 ✨ Key Features
+
 📂 Data Collection & Processing
 
 📥 Loaded the California Housing Dataset from Scikit-learn.
