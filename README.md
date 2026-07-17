@@ -1,221 +1,127 @@
-PROPVALUATE AI
-# 🏡 House Price Prediction using Machine Learning
+# PropValuate AI — Python Backend (FastAPI)
 
-## 📌 Project Overview
+This is the full Python rewrite of PropValuate AI. The valuation model,
+SHAP-style explanations, forecast, recommendation logic, and — importantly —
+the **PDF report generation** all run on the server now, in Python, instead
+of in the browser. This fixes the original "Download PDF report" bug for
+good: it can't break due to a missing or misnamed JS library, because there
+is no client-side PDF library anymore.
 
-This project predicts house prices using Machine Learning by comparing the performance of five different regression algorithms. The objective is to identify the model with the highest prediction accuracy while providing an efficient and scalable solution for real estate price estimation.
-
-The project performs data preprocessing, feature engineering, model training, hyperparameter tuning, model evaluation, and prediction. Among all the models, **XGBoost** achieved the highest prediction accuracy and was selected as the final model.
-
-
-
-## 🎯 Objectives
-
-- Predict house prices accurately.
-- Compare multiple Machine Learning algorithms.
-- Evaluate models using regression metrics.
-- Select the best-performing model.
-- Save the trained model for deployment.
-- Provide a simple and reusable prediction pipeline.
-
-
-
-# 📂 Project Structure
+## Project layout
 
 ```
-House-Price-Prediction/
-│
-├── dataset/
-│   ├── housing.csv
-│   ├── train.csv
-│   └── test.csv
-│
-├── models/
-│   ├── xgboost_model.pkl
-│   ├── random_forest.pkl
-│   ├── knn.pkl
-│   ├── linear_regression.pkl
-│   └── gradient_boosting.pkl
-│
-├── notebooks/
-│   └── model_training.ipynb
-│
-├── src/
-│   ├── preprocessing.py
-│   ├── train.py
-│   ├── evaluate.py
-│   └── predict.py
-│
-├── app.py
-├── requirements.txt
-├── README.md
-└── LICENSE
+main.py              → FastAPI app: routes for the page, valuation, PDF, chat
+model.py             → Valuation engine: XGBoost tree evaluator + business logic
+schemas.py           → Pydantic request models
+pdf_report.py         → Server-side PDF generation (ReportLab)
+data/
+  model.json          → Trained XGBoost trees (exported from train_model.py's model.json)
+  meta.json           → Feature maps, growth rates, R²/MAE, dropdown options
+  sub_stats.json       → Per-sublocality stats (distances, demand, convenience score)
+  heatmap.json        → All properties for the map view
+templates/
+  index.html          → The page (served as a static file — no template variables needed)
+static/
+  app.js              → Frontend logic; now calls the FastAPI backend instead of embedding data
+  style.css           → Unchanged design
+  leaflet.js/.css      → Map library
+train_model.py         → Retrains the model from the housing CSV (unchanged from before)
+requirements.txt       → Python dependencies
 ```
 
+## Running it
 
+1. Create a virtual environment (recommended):
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate      # Windows: .venv\Scripts\activate
+   ```
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Start the server:
+   ```bash
+   uvicorn main:app --reload
+   ```
+4. Open **http://127.0.0.1:8000** in your browser.
 
-# 🤖 Machine Learning Algorithms Used
+That's it — no Live Server, no `file://` quirks, no separate library files
+to keep in sync. Everything (page, styles, scripts, model, and PDF) is
+served by this one FastAPI app.
 
-## 1️⃣ XGBoost Regressor
+## API endpoints
 
-- Best overall performance
-- Handles missing values
-- Prevents overfitting using regularization
-- Fast and highly accurate
-- Final model selected
+| Method | Path              | Purpose                                                        |
+|--------|-------------------|------------------------------------------------------------------|
+| GET    | `/`               | Serves the page                                                  |
+| GET    | `/api/meta`       | Dropdown options, sub-locality stats, model R²/MAE, ticker stats |
+| GET    | `/api/heatmap`    | All properties for the map                                       |
+| POST   | `/api/valuate`    | Runs a valuation, returns predicted price + explanations         |
+| POST   | `/api/pdf-report` | Runs a valuation and streams back a PDF report                   |
+| POST   | `/api/chat`       | Rule-based assistant answers about the last valuation            |
 
-**Accuracy (R² Score): 88.9%**
+## Retraining the model
 
----
+`train_model.py` is unchanged — it still trains the XGBoost model from the
+housing CSV and writes `model.json` / `meta.json`. If you retrain, copy the
+new `model.json` into `data/model.json`, and merge the printed feature
+importances / R² / MAE into `data/meta.json` (the other fields in
+`meta.json` — locations, sub-locality stats, growth rates, etc. — come from
+a separate enrichment step, not from `train_model.py` alone).
 
-## 2️⃣ Random Forest Regressor
+## Why the PDF button was broken before
 
-- Ensemble learning method
-- Multiple Decision Trees
-- Reduces variance
-- Good generalization
+The old `index.html` loaded `<script src="jspdf.umd.min.js">`, but the
+uploaded library file was actually named `jspdf_umd_min.js` (underscores
+instead of dots). The browser 404'd silently, so `window.jspdf` was never
+defined, and clicking "Download PDF report" did nothing. This Python
+version sidesteps the whole class of bug: the PDF is built with ReportLab
+on the server and streamed to the browser as a file download, no client-side
+library required at all.
 
-**Accuracy (R² Score): 89.4%**
+## Why the ₹ symbol looked garbled in the PDF
 
----
+ReportLab's built-in Helvetica/Times fonts are Adobe's "standard 14" fonts,
+which do not include the ₹ (Indian Rupee, U+20B9) glyph — so it silently
+rendered as a stray superscript character instead. `pdf_report.py` now
+embeds DejaVu Sans/Serif (bundled in `fonts/`), which does include ₹, and
+uses them for all text in the report.
 
-## 3️⃣ Gradient Boosting Regressor
+## Tier 1 / Tier 2 / Tier 3 city coverage
 
-- Sequential boosting algorithm
-- Corrects previous model errors
-- Good prediction performance
+The location dropdown now covers 73 cities across three tiers (grouped with
+`<optgroup>` in the UI):
 
-**Accuracy (R² Score): 92.9%**
+- **Tier 1** (8): Delhi NCR, Mumbai, Bengaluru, Chennai, Hyderabad, Kolkata, Pune, Ahmedabad
+- **Tier 2** (35): Coimbatore, Madurai, Kochi, plus Tiruchirappalli, Salem,
+  Jaipur, Lucknow, Surat, Nagpur, Visakhapatnam, Guwahati, and 28 others
+- **Tier 3** (30): Dindigul, Karur, Sivakasi, Warangal, Kolhapur, Siliguri,
+  and 25 others
 
----
+**Important caveat, spelled out because it matters:** the XGBoost model was
+only ever trained on real transaction data for the original 10 cities
+(Ahmedabad, Bengaluru, Chennai, Coimbatore, Delhi NCR, Hyderabad, Kochi,
+Madurai, Mumbai, Pune). There's no real data for the ~63 newly added cities,
+so `generate_city_expansion.py` does **not** invent fake "real" listings —
+instead:
 
-## 4️⃣ Linear Regression
+1. Each new city gets a tier and, purely for feeding the model's
+   `location_c` feature, is mapped to a same-tier **proxy city** from the
+   original 10 (Mumbai for Tier 1, Coimbatore for Tier 2, Madurai for Tier 3).
+   This avoids the model extrapolating into a categorical code it never saw
+   in training.
+2. The features that actually carry most of the location signal — demand
+   index, local market index, convenience score, and distances to
+   facilities — are generated per sub-locality from tier-calibrated ranges
+   (calibrated against the min/max actually observed across the real 10
+   cities), with a fixed seed so results are reproducible run to run.
+3. Every generated sub-locality is flagged `"estimated": true` in
+   `sub_stats.json` — the app already had this mechanism (for sub-localities
+   in the original cities with too few sampled listings), so the UI already
+   shows an honest "modeled rather than measured" note for these areas
+   without any extra frontend work.
 
-- Baseline regression model
-- Simple and interpretable
-- Fast training
-
-**Accuracy (R² Score): 91.5%**
-
----
-
-## 5️⃣ K-Nearest Neighbors (KNN)
-
-- Instance-based learning
-- Predicts using nearest neighbors
-- Sensitive to feature scaling
-
-**Accuracy (R² Score): 77.6%**
-
-
-
-# 🔍 Evaluation Metrics
-
-The models were evaluated using:
-
-- R² Score
-- Mean Absolute Error (MAE)
-- Mean Squared Error (MSE)
-- Root Mean Squared Error (RMSE)
-
-
-
-# ⚙️ Technologies Used
-
-- Python
-- Pandas
-- NumPy
-- Scikit-learn
-- XGBoost
-- Joblib
-- Matplotlib
-- Streamlit (Optional)
-- Jupyter Notebook
-
-
-
-# 📦 Installation
-
-Clone the repository
-
-```bash
-git clone https://github.com/yourusername/House-Price-Prediction.git
-```
-
-Move into the project
-
-```bash
-cd House-Price-Prediction
-```
-
-Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-Run the project
-
-```bash
-python app.py
-```
-
-or
-
-```bash
-streamlit run app.py
-```
-
-
-
-# 📈 Workflow
-
-1. Load Dataset
-2. Data Cleaning
-3. Handle Missing Values
-4. Feature Encoding
-5. Feature Scaling
-6. Train-Test Split
-7. Train Five Models
-8. Hyperparameter Tuning
-9. Compare Model Performance
-10. Save Best Model (XGBoost)
-11. Predict House Prices
-
-
-
-# 🚀 Features
-
-- Data Preprocessing
-- Feature Engineering
-- Five Machine Learning Algorithms
-- Model Comparison
-- Automatic Best Model Selection
-- House Price Prediction
-- Model Saving
-- Easy Deployment
-
-
-
-# 🏆 Best Model
-
-After evaluating all algorithms, **XGBoost Regressor** achieved the highest prediction accuracy.
-
-### Why XGBoost?
-
-- Highest Accuracy
-- Fast Prediction
-- Better Generalization
-- Handles Missing Values
-- Regularization Prevents Overfitting
-- Suitable for Large Datasets
-
-Final Selected Model:
-
-```
-XGBoost Regressor
-Accuracy: 88.7%
-```
-
----
-
+To add real data for any of these cities later, retrain on real transactions
+and re-run/extend `generate_city_expansion.py` accordingly — or just replace
+the relevant entries in `sub_stats.json` directly.
