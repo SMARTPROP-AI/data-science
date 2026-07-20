@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PropValuate AI — Automated Property Valuation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/leaflet.css">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <div class="brand"><span class="mark">P</span> PropValuate <span style="opacity:.5;font-weight:400;">AI</span></div>
+    <nav class="links">
+      <a href="#valuate">Valuate</a>
+      <a href="#forecast">Forecast</a>
+      <a href="#heatmap">Heatmap</a>
+      <a href="#facilities">Facilities</a>
+      <a href="#recommendation">Recommendation</a>
+    </nav>
+    <a href="#valuate" class="btn ghost" style="padding:9px 18px;font-size:13px;">Get a valuation</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Automated Valuation Model · India</span>
+      <h1 class="hero-title">Every Indian property, <em>appraised</em> in seconds.</h1>
+      <p class="hero-sub">PropValuate AI runs a tuned XGBoost model against real transaction data across Indian cities, then explains its reasoning, forecasts appreciation, and tells you whether to buy, wait, or walk away.</p>
+      <a href="#valuate" class="btn">Estimate a property's value →</a>
+    </div>
+    <div>
+  
+        <div class="house-photo">
+          <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=600&q=80" alt="Property view">
+    
+      </div>
+     
+    </div>
+  </div>
+</section>
+
+<section id="valuate">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">01 — Property Details</span>
+      <h2>Tell us about the property</h2>
+      <p>Fill in the details below — location, size, and amenities. The model does the rest.</p>
+    </div>
+
+    <form class="ledger" id="valuation-form">
+      <div class="ledger-grid">
+        <div class="field"><label>Location (city)</label><select id="f-location" required></select></div>
+        <div class="field"><label>Sub-district / area</label><select id="f-sublocality" required></select></div>
+        <div class="field"><label>Property type</label><select id="f-ptype" required></select></div>
+        <div class="field"><label>Furnishing</label><select id="f-furnish" required></select></div>
+        <div class="field"><label>Area (sq.ft)</label><input type="number" id="f-area" min="500" max="20000" value="2200" required></div>
+        <div class="field"><label>Bedrooms (BHK)</label><input type="number" id="f-bedrooms" min="1" max="8" value="3" required></div>
+        <div class="field"><label>Bathrooms</label><input type="number" id="f-bathrooms" min="1" max="6" value="2" required></div>
+        <div class="field"><label>Stories</label><input type="number" id="f-stories" min="1" max="4" value="2" required></div>
+        <div class="field"><label>Parking (cars)</label><input type="number" id="f-parking" min="0" max="4" value="1" required></div>
+        <div class="field"><label>Property age (years)</label><input type="number" id="f-age" min="0" max="45" value="8" required></div>
+
+        <div class="checks">
+          <label class="chk"><input type="checkbox" id="f-mainroad" checked> Main road access</label>
+          <label class="chk"><input type="checkbox" id="f-guestroom"> Guest room</label>
+          <label class="chk"><input type="checkbox" id="f-basement"> Basement</label>
+          <label class="chk"><input type="checkbox" id="f-hotwater"> Hot water heating</label>
+          <label class="chk"><input type="checkbox" id="f-ac" checked> Air conditioning</label>
+          <label class="chk"><input type="checkbox" id="f-prefarea" checked> Preferred / gated area</label>
+        </div>
+      </div>
+      <div class="ledger-actions">
+        <button type="submit" class="btn">Estimate value →</button>
+        <button type="button" class="btn ghost" id="pdf-btn">Download PDF report</button>
+      </div>
+    </form>
+
+    <div class="result-wrap" id="valuate-results">
+      <div class="result-grid">
+        <div class="stamp-card">
+          <div class="seal">
+            <div class="tag">Estimated Value</div>
+            <div class="amt" id="seal-amt">–</div>
+          </div>
+          <div class="range" id="seal-range">–</div>
+          <div class="small-note" id="seal-loc">–</div>
+          <div class="conf">Model confidence — <b id="model-r2-inline"></b> R² · avg error <b id="model-mae-inline"></b></div>
+        </div>
+        <div class="waterfall">
+          <h3>Why this price</h3>
+          <div class="wf-sub">Approximate feature contributions vs. an average Indian property in this dataset</div>
+          <div id="wf-rows"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="forecast">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">02 — Future Price Forecast</span>
+      <h2>Where this property is headed</h2>
+      <p>Projected value over the next 5 years, based on the growth trend of this micro-market.</p>
+    </div>
+    <div class="result-wrap show">
+      <div class="forecast-grid">
+        <div class="chart-card"><div id="forecast-chart"></div></div>
+        <div class="info-card">
+          <h4>Growth outlook</h4>
+          <div class="info-row"><span>Growth zone</span><span class="v" id="info-zone">–</span></div>
+          <div class="info-row"><span>Annual appreciation</span><span class="v" id="info-rate">–</span></div>
+          <div class="info-row"><span>Demand index</span><span class="v" id="info-demand">–</span></div>
+          <div class="info-row"><span>Projected value, Year 5</span><span class="v" id="info-5yr">–</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="heatmap">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">03 — Market Heatmap</span>
+      <h2>Demand across the map</h2>
+      <p>Every property in the training data, plotted by location and colored by demand. Run a valuation to zoom to your city.</p>
+    </div>
+    <div id="map"></div>
+    <div class="legend">
+      <span><span class="dot" style="background:#523e9c;"></span>High demand (70+)</span>
+      <span><span class="dot" style="background:#c73e85;"></span>Moderate demand</span>
+      <span><span class="dot" style="background:#a7d24b;"></span>Lower demand</span>
+    </div>
+  </div>
+</section>
+
+<section id="facilities">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">04 — Nearby Facilities</span>
+      <h2>What's around the property</h2>
+      <p>Typical distances to essential facilities for this city, and an overall convenience score.</p>
+    </div>
+    <div class="fac-grid" id="fac-grid"></div>
+    <div class="small-note" id="fac-area-note" style="margin-bottom:6px;"></div>
+    <div class="conv-gauge">
+      <div style="min-width:170px;font-size:13.5px;opacity:.8;">Location convenience score</div>
+      <div class="gauge-track"><div class="gauge-fill" id="conv-fill" style="width:0%;"></div></div>
+      <div style="font-family:var(--serif);color:var(--brass);min-width:60px;text-align:right;" id="conv-score-val">–</div>
+    </div>
+  </div>
+</section>
+
+<section id="recommendation">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">05 — Smart Recommendation</span>
+      <h2>Buy, wait, or avoid?</h2>
+      <p>Combining predicted price, market comparables, growth zone, and demand into one call.</p>
+    </div>
+    <div class="rec-card">
+      <div class="rec-badge wait" id="rec-badge">–</div>
+      <div>
+        <ul class="rec-reasons" id="rec-reasons"></ul>
+        <div class="rec-neg" id="rec-neg"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  PropValuate AI — Indian property records across cities @2026.
+
+<button class="chat-fab" id="chat-fab">💬</button>
+<div class="chat-panel" id="chat-panel">
+  <div class="chat-head"><span><span class="dot"></span>Valuation Assistant</span><span id="chat-close" style="cursor:pointer;opacity:.6;">✕</span></div>
+  <div class="chat-body" id="chat-body">
+    <div class="msg bot">Hi! I am a valuation above and ask me about the price, forecast, facilities, or whether to buy.</div>
+  </div>
+  <div class="chat-suggest">
+    <span class="chip">What's it worth?</span>
+    <span class="chip">Should I buy?</span>
+    <span class="chip">5 year forecast?</span>
+    <span class="chip">Nearby facilities?</span>
+  </div>
+  <div class="chat-input">
+    <input type="text" id="chat-input" placeholder="Ask about this property...">
+    <button id="chat-send">➤</button>
+  </div>
+</div>
+
+<!-- Local library files (kept alongside this HTML file — no internet/CDN required) -->
+<script src="/static/leaflet.js"></script>
+<!-- Application logic: fetches model data + runs valuations via the FastAPI backend -->
+<script src="/static/app.js"></script>
+</body>
+</html>
