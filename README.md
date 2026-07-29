@@ -37,36 +37,35 @@ The project includes various visualizations to understand the dataset and featur
 - 🌊 Seaborn
 
   ## Project Structure
-  propvaluate-backend/
-├── main.py              → FastAPI app: routes (/, /api/valuate, /api/pdf-report, /api/chat, etc.)
-├── model.py             → ValuationEngine: XGBoost tree evaluator + SHAP-style contributions,
-│                           forecast, buy/wait/avoid recommendation logic
-├── pdf_report.py         → Server-side PDF generation (ReportLab + embedded DejaVu fonts for ₹)
-├── schemas.py           → Pydantic request models (ValuationRequest, ChatRequest)
-├── train_model.py       → Retrains XGBoost model from the housing CSV → model.json + meta.json
-├── requirements.txt      → fastapi, uvicorn[standard], pydantic, python-multipart, reportlab
+propvaluate-backend/
+├── main.py                # FastAPI app: routes (/, /api/valuate, /api/pdf-report, /api/chat, etc.)
+├── model.py                # ValuationEngine: XGBoost tree evaluator + SHAP-style contributions,
+│                            #   forecast, buy/wait/avoid recommendation logic
+├── pdf_report.py            # Server-side PDF generation (ReportLab + embedded DejaVu fonts for ₹)
+├── schemas.py                # Pydantic request models (ValuationRequest, ChatRequest)
+├── train_model.py            # Retrains XGBoost model from the housing CSV → model.json + meta.json
+├── requirements.txt            # fastapi, uvicorn[standard], pydantic, python-multipart, reportlab
 ├── README.md
 │
-├── data/                 (referenced by model.py but not uploaded here)
-│   ├── model.json        → Trained XGBoost trees
-│   ├── meta.json         → Feature maps, growth rates, R²/MAE, dropdown options
-│   ├── sub_stats.json    → Per-sublocality stats (distances, demand, convenience)
-│   └── heatmap.json      → All properties for the map view
+├── data/                    # referenced by model.py but not uploaded here
+│   ├── model.json            # Trained XGBoost trees
+│   ├── meta.json            # Feature maps, growth rates, R²/MAE, dropdown options
+│   ├── sub_stats.json        # Per-sublocality stats (distances, demand, convenience)
+│   └── heatmap.json            # All properties for the map view
 │
-├── fonts/                (referenced by pdf_report.py but not uploaded here)
+├── fonts/                    # referenced by pdf_report.py but not uploaded here
 │   ├── DejaVuSans.ttf
 │   ├── DejaVuSans-Bold.ttf
 │   ├── DejaVuSerif.ttf
 │   └── DejaVuSerif-Bold.ttf
 │
 ├── templates/
-│   └── index.html        → Main page (static, no Jinja variables)
+│   └── index.html            # Main page (static, no Jinja variables)
 │
 └── static/
-    ├── app.js            → Frontend logic, calls the FastAPI backend
+    ├── app.js                # Frontend logic, calls the FastAPI backend
     ├── style.css
-    └── leaflet.js/.css    → Map library
-
+    └── leaflet.js/.css        # Map library
 
 ## 🤖 Machine Learning Models
 
