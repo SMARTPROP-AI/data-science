@@ -1,4 +1,8 @@
 """
+DEVELOPED BY RAMPRABHU (8208E23ASR045)
+"""
+
+"""
 model.py — Core valuation engine for PropValuate AI.
 
 This is a direct Python port of the tree-evaluation and business logic that
