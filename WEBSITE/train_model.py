@@ -25,11 +25,6 @@ df = pd.read_csv('/mnt/user-data/uploads/1783659962212_Housing_full_enriched_cle
 bin_cols = ['mainroad','guestroom','basement','hotwaterheating','airconditioning','prefarea']
 for c in bin_cols:
     df[c+'_b'] = (df[c]=='yes').astype(int)
-
-# ==========================================================
-# Extract all unique categorical values from the dataset.
-# ==========================================================
-
 locations = sorted(df['location'].unique().tolist())
 ptypes = sorted(df['property_type'].unique().tolist())
 furnish = sorted(df['furnishingstatus'].unique().tolist())
@@ -41,18 +36,9 @@ loc_map = {l:i for i,l in enumerate(locations)}
 pt_map = {p:i for i,p in enumerate(ptypes)}
 fn_map = {f:i for i,f in enumerate(furnish)}
 
-# ==========================================================
-# Encode categorical columns into numeric values using
-# ==========================================================
-
 df['location_c'] = df['location'].map(loc_map)
 df['ptype_c'] = df['property_type'].map(pt_map)
 df['furnish_c'] = df['furnishingstatus'].map(fn_map)
-
-
-# ==========================================================
-# Select all input features used for house price prediction.
-# ==========================================================
 
 feature_cols = ['area','bedrooms','bathrooms','stories','parking','property_age_years',
                 'mainroad_b','guestroom_b','basement_b','hotwaterheating_b','airconditioning_b','prefarea_b',
